@@ -26,12 +26,12 @@ const debugObject = {
       y: mesh.rotation.y + Math.PI * 2,
       // z: mesh.rotation.z + Math.PI * 2,
       ease: "power1.inOut",
-      onUpdate: () => {
-        // Update the mesh rotation to reflect the changes
-        mesh.rotation.x = mesh.rotation.x;
-        mesh.rotation.y = mesh.rotation.y;
-        mesh.rotation.z = mesh.rotation.z;
-      },
+      // onUpdate: () => {
+      //   // Update the mesh rotation to reflect the changes
+      //   mesh.rotation.x = mesh.rotation.x;
+      //   mesh.rotation.y = mesh.rotation.y;
+      //   mesh.rotation.z = mesh.rotation.z;
+      // },
     });
   },
   subdivisions: 2,
