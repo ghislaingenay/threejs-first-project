@@ -74,10 +74,21 @@ camera.lookAt(mesh.position);
 // Animate
 const clock = new THREE.Clock();
 
-window.addEventListener("resize", (e) => {
+window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+
+  /** Handles pixel ratio
+   * Eyes see almost no difference between 2 and 3
+   */
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+});
+
+// check double screen for fullscreen
+window.addEventListener("dblclick", () => {
+  if (!document.fullscreenElement) canvas.requestFullscreen();
+  else document.exitFullscreen();
 });
 
 const animateCamera = () => {
