@@ -4,11 +4,37 @@ import GUI from "lil-gui";
 import gsap from "gsap";
 
 // Debug
-const gui = new GUI();
+const gui = new GUI({
+  width: 500,
+  title: "Debug Controls",
+  closeFolders: true,
+});
+gui.hide(); // Hide the GUI by default
+
+window.addEventListener("keydown", (event) => {
+  if (event.key === "h") {
+    gui.show(gui._hidden);
+  }
+});
 
 const debugObject = {
   color: "#ff0000",
-  spin: () => {},
+  spin: () => {
+    gsap.to(mesh.rotation, {
+      duration: 1,
+      x: mesh.rotation.x + Math.PI * 2,
+      y: mesh.rotation.y + Math.PI * 2,
+      // z: mesh.rotation.z + Math.PI * 2,
+      ease: "power1.inOut",
+      onUpdate: () => {
+        // Update the mesh rotation to reflect the changes
+        mesh.rotation.x = mesh.rotation.x;
+        mesh.rotation.y = mesh.rotation.y;
+        mesh.rotation.z = mesh.rotation.z;
+      },
+    });
+  },
+  subdivisions: 2,
 };
 
 const canvas = document.querySelector<HTMLCanvasElement>("#webgl");
@@ -30,30 +56,53 @@ const material = new THREE.MeshBasicMaterial({
 const mesh = new THREE.Mesh(geometry, material);
 scene.add(mesh);
 
-gui.add(mesh.position, "x").min(-3).max(3).step(0.01).name("Position X");
-gui.add(mesh.position, "y").min(-3).max(3).step(0.01).name("Position Y");
-gui.add(mesh.position, "z").min(-3).max(3).step(0.01).name("Position Z");
-gui
+const [cubePosition, cubeRotation, cubeScale] = [
+  gui.addFolder("Position"),
+  gui.addFolder("Rotation"),
+  gui.addFolder("Scale"),
+];
+cubePosition.close();
+cubePosition
+  .add(mesh.position, "x")
+  .min(-3)
+  .max(3)
+  .step(0.01)
+  .name("Position X");
+cubePosition
+  .add(mesh.position, "y")
+  .min(-3)
+  .max(3)
+  .step(0.01)
+  .name("Position Y");
+cubePosition
+  .add(mesh.position, "z")
+  .min(-3)
+  .max(3)
+  .step(0.01)
+  .name("Position Z");
+cubeRotation.close();
+cubeRotation
   .add(mesh.rotation, "x")
   .min(-Math.PI)
   .max(Math.PI)
   .step(0.01)
   .name("Rotation X");
-gui
+cubeRotation
   .add(mesh.rotation, "y")
   .min(-Math.PI)
   .max(Math.PI)
   .step(0.01)
   .name("Rotation Y");
-gui
+cubeRotation
   .add(mesh.rotation, "z")
   .min(-Math.PI)
   .max(Math.PI)
   .step(0.01)
   .name("Rotation Z");
-gui.add(mesh.scale, "x").min(0.1).max(3).step(0.01).name("Scale X");
-gui.add(mesh.scale, "y").min(0.1).max(3).step(0.01).name("Scale Y");
-gui.add(mesh.scale, "z").min(0.1).max(3).step(0.01).name("Scale Z");
+cubeScale.close();
+cubeScale.add(mesh.scale, "x").min(0.1).max(3).step(0.01).name("Scale X");
+cubeScale.add(mesh.scale, "y").min(0.1).max(3).step(0.01).name("Scale Y");
+cubeScale.add(mesh.scale, "z").min(0.1).max(3).step(0.01).name("Scale Z");
 
 // cannot use addColor on MeshBasicMaterial directly
 // as it does not have a color property, so we need to use the material
@@ -66,24 +115,25 @@ gui
 gui.add(mesh, "visible").name("Mesh Visible");
 gui.add(material, "wireframe").name("Wireframe");
 
-debugObject.spin = () => {
-  gsap.to(mesh.rotation, {
-    duration: 1,
-    x: mesh.rotation.x + Math.PI * 2,
-    y: mesh.rotation.y + Math.PI * 2,
-    // z: mesh.rotation.z + Math.PI * 2,
-    ease: "power1.inOut",
-    onUpdate: () => {
-      // Update the mesh rotation to reflect the changes
-      mesh.rotation.x = mesh.rotation.x;
-      mesh.rotation.y = mesh.rotation.y;
-      mesh.rotation.z = mesh.rotation.z;
-    },
-  });
-};
-
 gui.add(debugObject, "spin").name("Spin Mesh");
-
+gui
+  .add(debugObject, "subdivisions")
+  .min(1)
+  .max(20)
+  .step(1)
+  .name("Subdivisions")
+  .onFinishChange(() => {
+    mesh.geometry.dispose(); // Dispose of the old geometry
+    // Update geometry with new subdivisions
+    mesh.geometry = new THREE.BoxGeometry(
+      1,
+      1,
+      1,
+      debugObject.subdivisions,
+      debugObject.subdivisions,
+      debugObject.subdivisions
+    );
+  });
 /**
  * Sizes
  */
